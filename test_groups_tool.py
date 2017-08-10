@@ -21,7 +21,7 @@ def main():
         file_changes = process_csv(FLAGS.in_csv_name, FLAGS.force_changes)
 
         if file_changes:
-            print('Updating {} and statistics to reflect these changes...'.format(FLAGS.in_csv_name))
+            print('Updating {} and statistics files to reflect these changes...'.format(FLAGS.in_csv_name))
             search_and_report(FLAGS.search_root, FLAGS.in_csv_name)
     else:
         search_and_report(FLAGS.search_root, FLAGS.out_csv_name)
@@ -64,6 +64,7 @@ def search_and_report(search_root, out_csv_name):
 
 
 def generate_reports(data_list, out_csv_name):
+    print('Generating reports...')
     statistics_dict = {
         'counts': {
             'test_case_files': 0,
@@ -73,7 +74,7 @@ def generate_reports(data_list, out_csv_name):
         'groups_membership': {}
     }
 
-    print('Writing results to {}'.format(out_csv_name))
+    print('Writing data to {}'.format(out_csv_name))
     with open(out_csv_name, 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=CSV_FIELD_NAMES)
         writer.writeheader()
@@ -81,12 +82,12 @@ def generate_reports(data_list, out_csv_name):
             update_group_statistics(annotation_data_item, statistics_dict['group_counts'], statistics_dict['groups_membership'])
             writer.writerow(annotation_data_item)
 
-    print('Writing group membership histogram results to group_membership_histogram.txt')
+    print('Writing group membership histogram to group_membership_histogram.txt')
     with open('group_membership_histogram.txt', 'w') as f:
         with redirect_stdout(f):
             print_values_value_sorted(statistics_dict['group_counts'])
 
-    print('Writing group membership lists results to group_membership_lists.txt')
+    print('Writing group membership lists to group_membership_lists.txt')
     with open('group_membership_lists.txt', 'w') as f:
         with redirect_stdout(f):
             sorted_hist = sorted(statistics_dict['group_counts'].items(), key=operator.itemgetter(1))
@@ -99,6 +100,7 @@ def generate_reports(data_list, out_csv_name):
 
 
 def search_directory(search_root):
+    print('Searching {} and subdirectories for files like "{}*{}" ...'.format(search_root, SEARCH_FILENAME_PREFIX, SEARCH_FILENAME_EXT))
     data_list = []
 
     search_start_path = os.path.abspath(search_root)
@@ -182,16 +184,18 @@ def print_values_key_sorted(count_dict):
 
 
 def process_csv(in_csv_name, force_changes):
+    print('Reading data from {} ...'.format(in_csv_name))
     with open(in_csv_name, 'r') as csvfile:
         data = list(csv.DictReader(csvfile))
 
     csv_modified_time = os.path.getmtime(in_csv_name)
     file_changes = False
 
+    print('Checking files for test annotation differences...')
     for row in data:
         absolute_path = row['Absolute Path']
         filename = row['Filename']
-        # If the file was modified more recently than the CSV, print a warning and don't modify the file
+
         file_modified_time = os.path.getmtime(absolute_path)
         if file_modified_time > csv_modified_time and not force_changes:
             print('WARNING: File {} was modified more recently than your input CSV file. I will not make changes to {}'.format(filename, absolute_path))
@@ -262,23 +266,6 @@ def write_file(contents, absolute_path):
     with open(absolute_path, 'w') as f:
         for line in contents:
             f.write(line)
-
-
-def write_groups_to_file(groups, absolute_path):
-    with open(absolute_path, 'r') as f:
-        file_contents = f.readlines()
-
-    line_number = 1
-    with open(absolute_path, 'w') as f:
-        for line in file_contents:
-            if line.strip()[:5] == '@Test' and groups_brackets_in(line):
-                start_index = line.find('{')
-                end_index = line.find('}')
-                new_annotation = line[:start_index+1] + ', '.join('"{}"'.format(group) for group in groups) + line[end_index:]
-                line = new_annotation
-                print('Writing new groups to line {} of {}:\n{}\n'.format(line_number, absolute_path, new_annotation))
-            f.write(line)
-            line_number += 1
 
 
 def groups_brackets_in(test_annotation):
