@@ -32,19 +32,20 @@ def set_up_args():
         '--search_root',
         type=str,
         default=os.path.expanduser('~/tve_ott_cms/test'),
-        help='Absolute path to the directory from which to start searching for test cases.'
+        help='Absolute path to the directory from which to start searching for test cases. '+
+                '(Default: \{your home directory\}/tve_ott_cms/test)'
     )
     parser.add_argument(
         '--search_filename_prefix',
         type=str,
         default='TC',
-        help='When generating the output CSV, only check files starting with the SEARCH_FILENAME_PREFIX. (Default "TC")'
+        help='When generating the output CSV, only check files starting with SEARCH_FILENAME_PREFIX. (Default: "TC")'
     )
     parser.add_argument(
         '--search_filename_suffix',
         type=str,
         default='.java',
-        help='When generating the output CSV, only check files ending with SEARCH_FILENAME_SUFFIX. (Default ".java")'
+        help='When generating the output CSV, only check files ending with SEARCH_FILENAME_SUFFIX. (Default: ".java")'
     )
     parser.add_argument(
         '--out_csv_name',
