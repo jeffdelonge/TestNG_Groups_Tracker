@@ -9,12 +9,11 @@ import operator
 import ast
 
 
-SEARCH_FILENAME_PREFIX = 'TC'
-SEARCH_FILENAME_EXT = '.java'
 CSV_FIELD_NAMES = ['Filename', 'Groups', 'Annotation', 'Associated Function', 'Line Number', 'Package', 'Absolute Path']
 
 
 def main():
+    global FLAGS
     FLAGS = set_up_args()
 
     if FLAGS.in_csv_name:
@@ -34,6 +33,18 @@ def set_up_args():
         type=str,
         default=os.path.expanduser('~/tve_ott_cms/test'),
         help='Absolute path to the directory from which to start searching for test cases.'
+    )
+    parser.add_argument(
+        '--search_filename_prefix',
+        type=str,
+        default='TC',
+        help='When generating the output CSV, only check files starting with the SEARCH_FILENAME_PREFIX. (Default "TC")'
+    )
+    parser.add_argument(
+        '--search_filename_suffix',
+        type=str,
+        default='.java',
+        help='When generating the output CSV, only check files ending with SEARCH_FILENAME_SUFFIX. (Default ".java")'
     )
     parser.add_argument(
         '--out_csv_name',
@@ -100,7 +111,7 @@ def generate_reports(data_list, out_csv_name):
 
 
 def search_directory(search_root):
-    print('Searching {} and subdirectories for files like "{}*{}" ...'.format(search_root, SEARCH_FILENAME_PREFIX, SEARCH_FILENAME_EXT))
+    print('Searching {} and subdirectories for files like "{}*{}" ...'.format(search_root, FLAGS.search_filename_prefix, FLAGS.search_filename_suffix))
     data_list = []
 
     search_start_path = os.path.abspath(search_root)
@@ -117,7 +128,7 @@ def process_file(absolute_path):
     annotation_data_items = []
 
     filename = os.path.basename(absolute_path)
-    if filename.startswith(SEARCH_FILENAME_PREFIX) and filename.endswith(SEARCH_FILENAME_EXT):
+    if filename.startswith(FLAGS.search_filename_prefix) and filename.endswith(FLAGS.search_filename_suffix):
         with open(absolute_path, 'r') as f:
             annotations = []
             test_method = False
