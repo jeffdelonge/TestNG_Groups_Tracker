@@ -90,7 +90,9 @@ def generate_reports(data_list, out_csv_name):
     with open(out_csv_name, 'w') as csvfile:
         writer = csv.DictWriter(csvfile, fieldnames=CSV_FIELD_NAMES)
         writer.writeheader()
+        filenames = set()
         for annotation_data_item in data_list:
+            filenames.add(annotation_data_item['Filename'])
             update_group_statistics(annotation_data_item, statistics_dict['group_counts'], statistics_dict['groups_membership'])
             writer.writerow(annotation_data_item)
 
@@ -109,6 +111,8 @@ def generate_reports(data_list, out_csv_name):
                 for test_string in group_membership_list:
                     print('\t{}'.format(test_string))
                 print()
+
+    print('{} test cases found in {} files'.format(len(data_list), len(filenames)))
 
 
 def search_directory(search_root):
