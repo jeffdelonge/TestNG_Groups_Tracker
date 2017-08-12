@@ -72,3 +72,11 @@ If the groups manager makes changes to any files in your TestNG project, it will
 [Group membership tracking](#group-membership-tracking) and overwrite all entries in the CSV file to keep the CSV file up to date.
 Note that you should provide any of the optional arguments you provided when originally generating the reports, as this CSV update
 step will need all of these arguments to keep the CSV update consistent with the original CSV creation.
+
+You can optionally provide the following arguments:
+*   `--in_csv_name IN_CSV_NAME`
+        Name of a CSV input file containing data about test cases.
+        No default value.
+
+*   `--force_changes`
+        Force updates to files even if they have been modified more recently than the input CSV file.
